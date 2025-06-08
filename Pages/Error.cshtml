@@ -1,0 +1,10 @@
+﻿@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Доступ запрещен";
+}
+<div class="text-center py-5">
+    <h1 class="text-danger">@ViewData["Title"]</h1>
+    <p class="lead">У вас нет доступа к этому ресурсу</p>
+    <a asp-page="/Index" class="btn btn-primary mt-3">На главную</a>
+</div>

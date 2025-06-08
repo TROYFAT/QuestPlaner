@@ -1,0 +1,66 @@
+﻿@page
+@model QuestPlanner.Pages.Activities.IndexModel
+@{
+    ViewData["Title"] = "Активности";
+}
+
+<div class="content-container bg-white rounded shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Активности для поездки: @Model.Trip.Title</h4>
+        <a asp-page="Create" asp-route-tripId="@Model.Trip.Id" class="btn btn-primary">Создать активность</a>
+    </div>
+
+    @if (Model.Trip.Activities.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Название</th>
+                        <th>Дата начала</th>
+                        <th>Дата окончания</th>
+                        <th>Цена</th>
+                        <th>Прогресс</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Trip.Activities)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.StartTime.ToString("g")</td>
+                            <td>@item.EndTime.ToString("g")</td>
+                            <td>@item.Price.ToString("C")</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar" role="progressbar"
+                                         style="width: @item.Progress%;"
+                                         aria-valuenow="@item.Progress"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        @item.Progress%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Изменить</a>
+                                    <a asp-page="./Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Удалить</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">Нет добавленных активностей</div>
+    }
+
+    <div class="text-center mt-4">
+        <a asp-page="../Trips/Index" class="btn btn-secondary">Назад к поездкам</a>
+    </div>
+</div>

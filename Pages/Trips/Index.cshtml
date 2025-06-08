@@ -1,0 +1,141 @@
+﻿@page
+@using QuestPlanner.Models
+@model QuestPlanner.Pages.Trips.IndexModel
+@{
+    ViewData["Title"] = "Мои поездки";
+}
+
+<div class="content-container">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h1 class="mb-0">Мои поездки</h1>
+        <a asp-page="Create" class="btn btn-primary">Создать новую поездку</a>
+    </div>
+
+    @if (Model.Trips != null && Model.Trips.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Название</th>
+                        <th>Место назначения</th>
+                        <th>Дата начала</th>
+                        <th>Дата окончания</th>
+                        <th>Прогресс</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Trips)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td>@item.Destination</td>
+                            <td>@item.StartDate.ToString("d")</td>
+                            <td>@item.EndDate.ToString("d")</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar" role="progressbar"
+                                         style="width: @item.Progress%;"
+                                         aria-valuenow="@item.Progress"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        @item.Progress%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (item.Status == TripStatus.Planning)
+                                {
+                                    <span class="badge bg-warning">Планируется</span>
+                                }
+                                else if (item.Status == TripStatus.InProgress)
+                                {
+                                    <span class="badge bg-primary">В процессе</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Завершена</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group-actions d-flex flex-wrap gap-2">
+                                    @if (item.Status != TripStatus.Completed)
+                                    {
+                                        <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                                    }
+                                    <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Детали</a>
+
+                                    @if (item.Status != TripStatus.Completed)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-success"
+                                                data-bs-toggle="modal" data-bs-target="#completeModal-@item.Id">
+                                            Завершить
+                                        </button>
+                                    }
+
+                                    @if (item.Status != TripStatus.Completed)
+                                    {
+                                        <a asp-page="../Activities/Index" asp-route-tripId="@item.Id"
+                                           class="btn btn-sm btn-outline-secondary">
+                                            Активности
+                                        </a>
+                                    }
+                                </div>
+
+                                <!-- Модальное окно подтверждения -->
+                                <div class="modal fade" id="completeModal-@item.Id" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Завершение поездки</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Вы уверены, что хотите завершить поездку "@item.Title"?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                <form method="post" asp-page-handler="Complete" asp-route-id="@item.Id">
+                                                    <button type="submit" class="btn btn-success">Завершить</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            У вас пока нет поездок. Создайте первую!
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация всех модальных окон
+            var completeModals = document.querySelectorAll('.complete-modal');
+            completeModals.forEach(function(modal) {
+                modal.addEventListener('hidden.bs.modal', function () {
+                    // Убедимся, что бэкдроп удаляется
+                    var backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(function(backdrop) {
+                        backdrop.remove();
+                    });
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+            });
+        });
+    </script>
+}

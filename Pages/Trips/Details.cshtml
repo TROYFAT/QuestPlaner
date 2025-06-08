@@ -1,0 +1,173 @@
+﻿@page
+@model QuestPlanner.Pages.Trips.DetailsModel
+@{
+    ViewData["Title"] = "Детали поездки";
+}
+
+<div class="content-container bg-white rounded shadow-sm p-4">
+    <h4>@Model.Trip.Title</h4>
+    <hr />
+
+    <!-- Диаграмма Ганта -->
+    <div class="gantt-container mt-4">
+        <div class="gantt-header d-flex mb-3">
+            <div class="gantt-sidebar" style="width: 200px;">
+                <strong>Название</strong>
+            </div>
+            <div class="gantt-timeline flex-grow-1">
+                <div class="d-flex">
+                    @for (var day = Model.Trip.StartDate; day <= Model.Trip.EndDate; day = day.AddDays(1))
+                    {
+                        <div class="gantt-day @(day.Day == 1 ? "first-day" : "")"
+                             style="width: 30px; border-left: 1px solid #dee2e6;">
+                            @if (day.Day == 1 || day == Model.Trip.StartDate)
+                            {
+                                <small>@day.ToString("MMM d")</small>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Бар поездки -->
+        <div class="gantt-row mb-2">
+            <div class="gantt-sidebar" style="width: 200px;">
+                @Model.Trip.Title
+            </div>
+            <div class="gantt-bar-container flex-grow-1 position-relative">
+                <div class="gantt-bar trip-bar"
+                     style="left: @Model.GetDayOffset(Model.Trip.StartDate)px;
+                            width: @Model.GetDurationWidth(Model.Trip.StartDate, Model.Trip.EndDate)px;"
+                     data-bs-toggle="modal" data-bs-target="#tripModal">
+                    <div class="progress h-100">
+                        <div class="progress-bar" style="width: @Model.Trip.Progress%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Бары активностей -->
+        @foreach (var activity in Model.Trip.Activities.OrderBy(a => a.StartTime))
+        {
+            <div class="gantt-row mb-2">
+                <div class="gantt-sidebar" style="width: 200px;">
+                    @activity.Name
+                </div>
+                <div class="gantt-bar-container flex-grow-1 position-relative">
+                    <div class="gantt-bar activity-bar"
+                         style="left: @Model.GetDayOffset(activity.StartTime)px;
+                                    width: @Model.GetDurationWidth(activity.StartTime, activity.EndTime)px;"
+                         data-bs-toggle="modal" data-bs-target="#activityModal-@activity.Id">
+                        <div class="progress h-100">
+                            <div class="progress-bar" style="width: @activity.Progress%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Общая стоимость -->
+        <div class="text-center mt-4">
+            <h5>Общая стоимость: @Model.GetTotalCost().ToString("C")</h5>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-page="./Index" class="btn btn-secondary">Назад к поездкам</a>
+    </div>
+</div>
+
+<!-- Модальное окно поездки -->
+<div class="modal fade" id="tripModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Model.Trip.Title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Место назначения:</strong> @Model.Trip.Destination</p>
+                <p><strong>Даты:</strong> @Model.Trip.StartDate.ToString("d") - @Model.Trip.EndDate.ToString("d")</p>
+                <p><strong>Количество человек:</strong> @Model.Trip.PeopleCount</p>
+                <p><strong>Базовая цена:</strong> @Model.Trip.BasePrice.ToString("C")</p>
+                <p><strong>Прогресс:</strong> @Model.Trip.Progress%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальные окна активностей -->
+@foreach (var activity in Model.Trip.Activities)
+{
+    <div class="modal fade" id="activityModal-@activity.Id" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@activity.Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Даты:</strong> @activity.StartTime.ToString("g") - @activity.EndTime.ToString("g")</p>
+                    <p><strong>Цена:</strong> @activity.Price.ToString("C")</p>
+                    <p><strong>Прогресс:</strong> @activity.Progress%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Styles {
+    <style>
+        .gantt-container {
+            overflow-x: auto;
+        }
+
+        .gantt-row {
+            display: flex;
+            height: 40px;
+            align-items: center;
+        }
+
+        .gantt-sidebar {
+            padding-right: 10px;
+            text-align: right;
+        }
+
+        .gantt-bar-container {
+            height: 100%;
+            position: relative;
+            background-color: #f8f9fa;
+        }
+
+        .gantt-bar {
+            position: absolute;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .trip-bar {
+            background-color: rgba(13, 110, 253, 0.2);
+            border: 1px solid #0d6efd;
+        }
+
+        .activity-bar {
+            background-color: rgba(25, 135, 84, 0.2);
+            border: 1px solid #198754;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .gantt-day {
+            text-align: center;
+            font-size: 0.7rem;
+            padding: 2px;
+        }
+
+        .first-day {
+            border-left: 2px solid #adb5bd !important;
+        }
+    </style>
+}

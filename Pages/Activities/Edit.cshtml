@@ -1,0 +1,91 @@
+﻿@page
+@model QuestPlanner.Pages.Activities.EditModel
+@{
+    ViewData["Title"] = "Редактировать активность";
+}
+
+<div class="content-container bg-white rounded shadow-sm p-4">
+    <h4>Редактировать активность</h4>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Activity.Id" />
+                <input type="hidden" asp-for="Activity.TripId" />
+
+                <div class="form-group mb-3">
+                    <label asp-for="Activity.Name" class="control-label"></label>
+                    <input asp-for="Activity.Name" class="form-control" />
+                    <span asp-validation-for="Activity.Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Activity.Price" class="control-label"></label>
+                    <input asp-for="Activity.Price" class="form-control" />
+                    <span asp-validation-for="Activity.Price" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Activity.StartTime" class="control-label"></label>
+                            <input asp-for="Activity.StartTime" class="form-control" type="datetime-local"
+                                   min="@Model.Trip.StartDate.ToString("yyyy-MM-dd")T00:00"
+                                   max="@Model.Trip.EndDate.ToString("yyyy-MM-dd")T23:59" />
+                            <span asp-validation-for="Activity.StartTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Activity.EndTime" class="control-label"></label>
+                            <input asp-for="Activity.EndTime" class="form-control" type="datetime-local"
+                                   min="@Model.Trip.StartDate.ToString("yyyy-MM-dd")T00:00"
+                                   max="@Model.Trip.EndDate.ToString("yyyy-MM-dd")T23:59" />
+                            <span asp-validation-for="Activity.EndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Activity.Progress" class="control-label"></label>
+                    <div class="d-flex align-items-center">
+                        <input asp-for="Activity.Progress" class="form-range" type="range" min="0" max="100" step="5"
+                               oninput="document.getElementById('progress-value').textContent = this.value + '%'" />
+                        <span class="ms-3" id="progress-value">@Model.Activity.Progress%</span>
+                    </div>
+                    <span asp-validation-for="Activity.Progress" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    <a asp-page="./Index" asp-route-tripId="@Model.Activity.TripId" class="btn btn-outline-secondary ms-2">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startInput = document.querySelector('input[name="Activity.StartTime"]');
+            const endInput = document.querySelector('input[name="Activity.EndTime"]');
+
+            startInput.addEventListener('change', function() {
+                endInput.min = this.value;
+                if (new Date(endInput.value) < new Date(this.value)) {
+                    endInput.value = this.value;
+                }
+            });
+
+            endInput.addEventListener('change', function() {
+                if (new Date(this.value) < new Date(startInput.value)) {
+                    this.value = startInput.value;
+                }
+            });
+        });
+    </script>
+}

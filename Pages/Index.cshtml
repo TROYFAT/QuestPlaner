@@ -1,0 +1,75 @@
+﻿@page
+@using QuestPlanner.Pages
+@model IndexModel
+@{
+    ViewData["Title"] = "Планировщик поездок";
+}
+
+<div class="content-container">
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <div class="text-center py-5">
+            <h1 class="display-4">Добро пожаловать в QuestPlanner!</h1>
+            <p class="lead">Пожалуйста, войдите или зарегистрируйтесь</p>
+            <div class="mt-4">
+                <a asp-page="/Identity/Account/Login" class="btn btn-primary mx-2">Войти</a>
+                <a asp-page="/Identity/Account/Register" class="btn btn-outline-primary mx-2">Регистрация</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <div class="d-flex justify-content-center gap-3 mb-4">
+                <a asp-page="/Trips/Create" class="btn btn-primary btn-lg py-3 px-4">Создать поездку</a>
+                <a asp-page="/Trips/Index" class="btn btn-outline-secondary btn-lg py-3 px-4">Мои поездки</a>
+            </div>
+
+            @if (Model.Trips != null && Model.Trips.Any())
+            {
+                <div class="p-4 bg-white rounded shadow-sm">
+                    <h3 class="mb-4">Ваши ближайшие поездки</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Место назначения</th>
+                                    <th>Даты</th>
+                                    <th>Прогресс</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var trip in Model.Trips)
+                                {
+                                    <tr>
+                                        <td>@trip.Title</td>
+                                        <td>@trip.Destination</td>
+                                        <td>@trip.StartDate.ToString("d") - @trip.EndDate.ToString("d")</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar"
+                                                     style="width: @trip.Progress%;"
+                                                     aria-valuenow="@trip.Progress"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100">
+                                                    @trip.Progress%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    У вас пока нет поездок. Создайте первую!
+                </div>
+            }
+        </div>
+    }
+</div>

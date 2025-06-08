@@ -1,0 +1,114 @@
+﻿@page
+@model QuestPlanner.Pages.Trips.CreateModel
+@{
+    ViewData["Title"] = "Создать поездку";
+}
+
+<div class="content-container">
+    <h1 class="text-center mb-4">Создать поездку</h1>
+
+    <div class="create-form">
+        <form method="post">
+            <!-- Отображение общих ошибок -->
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Название поездки *</label>
+                <input asp-for="Trip.Title" class="form-control" />
+                <span asp-validation-for="Trip.Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Место назначения *</label>
+                <input asp-for="Trip.Destination" class="form-control" />
+                <span asp-validation-for="Trip.Destination" class="text-danger"></span>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Дата начала *</label>
+                        <input asp-for="Trip.StartDate" class="form-control" type="date" />
+                        <span asp-validation-for="Trip.StartDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Дата окончания *</label>
+                        <input asp-for="Trip.EndDate" class="form-control" type="date" />
+                        <span asp-validation-for="Trip.EndDate" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Количество человек *</label>
+                        <input asp-for="Trip.PeopleCount" class="form-control" min="1" max="50" />
+                        <span asp-validation-for="Trip.PeopleCount" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Базовая цена *</label>
+                        <input asp-for="Trip.BasePrice" class="form-control" min="0" step="0.01" />
+                        <span asp-validation-for="Trip.BasePrice" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label">Прогресс подготовки</label>
+                <div class="d-flex align-items-center">
+                    <input asp-for="Trip.Progress" class="form-range" type="range" min="0" max="100" step="5"
+                           id="progress-slider" />
+                    <span class="ms-3" id="progress-value">@Model.Trip.Progress%</span>
+                </div>
+                <span asp-validation-for="Trip.Progress" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">@(Model.Trip?.Id == 0 ? "Создать" : "Сохранить")</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Инициализация ползунка прогресса
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressSlider = document.querySelector('input[type="range"][name="Trip.Progress"]');
+            const progressValue = document.getElementById('progress-value');
+
+            if (progressSlider && progressValue) {
+                // Обновление значения при изменении
+                progressSlider.addEventListener('input', function() {
+                    progressValue.textContent = this.value + '%';
+                });
+
+                // Инициализация начального значения
+                progressValue.textContent = progressSlider.value + '%';
+            }
+
+            // Форматирование дат для PostgreSQL
+            const startDateInput = document.querySelector('input[type="date"][name="Trip.StartDate"]');
+            const endDateInput = document.querySelector('input[type="date"][name="Trip.EndDate"]');
+
+            if (startDateInput) {
+                startDateInput.addEventListener('change', function() {
+                    this.value = new Date(this.value).toISOString().split('T')[0];
+                });
+            }
+
+            if (endDateInput) {
+                endDateInput.addEventListener('change', function() {
+                    this.value = new Date(this.value).toISOString().split('T')[0];
+                });
+            }
+        });
+    </script>
+}
