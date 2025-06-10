@@ -5,74 +5,84 @@
 }
 
 <div class="content-container bg-white rounded shadow-sm p-4">
-    <h4>@Model.Trip.Title</h4>
+    <h4 class="text-center">@Model.Trip.Title</h4>
     <hr />
 
     <!-- Диаграмма Ганта -->
-    <div class="gantt-container mt-4">
-        <div class="gantt-header d-flex mb-3">
-            <div class="gantt-sidebar" style="width: 200px;">
-                <strong>Название</strong>
-            </div>
-            <div class="gantt-timeline flex-grow-1">
-                <div class="d-flex">
+    <div class="gantt-container mt-4" style="overflow-x: auto;">
+        <div class="gantt-inner" style="min-width: @(200 + Model.TotalTimelineWidth)px;">
+            <!-- Заголовок -->
+            <div class="gantt-header d-flex mb-3">
+                <div class="gantt-sidebar" style="width: 200px; flex-shrink: 0;">
+                    <strong>Название</strong>
+                </div>
+                <div class="gantt-timeline d-flex" style="width: @(Model.TotalTimelineWidth)px;">
                     @for (var day = Model.Trip.StartDate; day <= Model.Trip.EndDate; day = day.AddDays(1))
                     {
                         <div class="gantt-day @(day.Day == 1 ? "first-day" : "")"
                              style="width: 30px; border-left: 1px solid #dee2e6;">
-                            @if (day.Day == 1 || day == Model.Trip.StartDate)
-                            {
-                                <small>@day.ToString("MMM d")</small>
-                            }
+                            <small>
+                                @if (day.Day == 1 || day == Model.Trip.StartDate)
+                                {
+                                    @day.ToString("MMM d")
+                                }
+                                else
+                                {
+                                    @day.Day
+                                }
+                            </small>
                         </div>
                     }
                 </div>
             </div>
-        </div>
 
-        <!-- Бар поездки -->
-        <div class="gantt-row mb-2">
-            <div class="gantt-sidebar" style="width: 200px;">
-                @Model.Trip.Title
-            </div>
-            <div class="gantt-bar-container flex-grow-1 position-relative">
-                <div class="gantt-bar trip-bar"
-                     style="left: @Model.GetDayOffset(Model.Trip.StartDate)px;
-                            width: @Model.GetDurationWidth(Model.Trip.StartDate, Model.Trip.EndDate)px;"
-                     data-bs-toggle="modal" data-bs-target="#tripModal">
-                    <div class="progress h-100">
-                        <div class="progress-bar" style="width: @Model.Trip.Progress%"></div>
-                    </div>
+            <!-- Бар поездки -->
+            <div class="gantt-row mb-2 d-flex">
+                <div class="gantt-sidebar" style="width: 200px; flex-shrink: 0;">
+                    @Model.Trip.Title
                 </div>
-            </div>
-        </div>
-
-        <!-- Бары активностей -->
-        @foreach (var activity in Model.Trip.Activities.OrderBy(a => a.StartTime))
-        {
-            <div class="gantt-row mb-2">
-                <div class="gantt-sidebar" style="width: 200px;">
-                    @activity.Name
-                </div>
-                <div class="gantt-bar-container flex-grow-1 position-relative">
-                    <div class="gantt-bar activity-bar"
-                         style="left: @Model.GetDayOffset(activity.StartTime)px;
-                                    width: @Model.GetDurationWidth(activity.StartTime, activity.EndTime)px;"
-                         data-bs-toggle="modal" data-bs-target="#activityModal-@activity.Id">
+                <div class="gantt-bar-container position-relative"
+                     style="width: @(Model.TotalTimelineWidth)px; height: 40px; background-color: #f8f9fa;">
+                    <div class="gantt-bar trip-bar"
+                         style="left: @Model.GetDayOffset(Model.Trip.StartDate)px;
+                                width: @Model.GetDurationWidth(Model.Trip.StartDate, Model.Trip.EndDate)px;"
+                         data-bs-toggle="modal" data-bs-target="#tripModal">
                         <div class="progress h-100">
-                            <div class="progress-bar" style="width: @activity.Progress%"></div>
+                            <div class="progress-bar" style="width: @Model.Trip.Progress%"></div>
                         </div>
                     </div>
                 </div>
             </div>
-        }
 
-        <!-- Общая стоимость -->
-        <div class="text-center mt-4">
-            <h5>Общая стоимость: @Model.GetTotalCost().ToString("C")</h5>
+            <!-- Бары активностей -->
+            @foreach (var activity in Model.Trip.Activities.OrderBy(a => a.StartTime))
+            {
+                <div class="gantt-row mb-2 d-flex">
+                    <div class="gantt-sidebar" style="width: 200px; flex-shrink: 0;">
+                        @activity.Name
+                    </div>
+                    <div class="gantt-bar-container position-relative"
+                         style="width: @(Model.TotalTimelineWidth)px; height: 40px; background-color: #f8f9fa;">
+                        <div class="gantt-bar activity-bar"
+                             style="left: @Model.GetDayOffset(activity.StartTime)px;
+                                        width: @Model.GetDurationWidth(activity.StartTime, activity.EndTime)px;"
+                             data-bs-toggle="modal" data-bs-target="#activityModal-@activity.Id">
+                            <div class="progress h-100">
+                                <div class="progress-bar" style="width: @activity.Progress%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 
+    <!-- Общая стоимость -->
+    <div class="text-center mt-4">
+        <h5>Общая стоимость: @Model.GetTotalCost().ToString("C")</h5>
+    </div>
+
+    <!-- Кнопка Назад -->
     <div class="text-center mt-4">
         <a asp-page="./Index" class="btn btn-secondary">Назад к поездкам</a>
     </div>
@@ -121,23 +131,24 @@
     <style>
         .gantt-container {
             overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .gantt-inner {
+            min-width: 100%;
         }
 
         .gantt-row {
-            display: flex;
             height: 40px;
-            align-items: center;
         }
 
         .gantt-sidebar {
             padding-right: 10px;
             text-align: right;
-        }
-
-        .gantt-bar-container {
             height: 100%;
-            position: relative;
-            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
         }
 
         .gantt-bar {
@@ -146,6 +157,9 @@
             border-radius: 4px;
             cursor: pointer;
             overflow: hidden;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10; /* Для кликабельности */
         }
 
         .trip-bar {
@@ -156,18 +170,23 @@
         .activity-bar {
             background-color: rgba(25, 135, 84, 0.2);
             border: 1px solid #198754;
-            top: 50%;
-            transform: translateY(-50%);
         }
 
         .gantt-day {
             text-align: center;
             font-size: 0.7rem;
             padding: 2px;
+            flex-shrink: 0;
+            width: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
         }
 
         .first-day {
             border-left: 2px solid #adb5bd !important;
+            font-weight: bold;
         }
     </style>
 }

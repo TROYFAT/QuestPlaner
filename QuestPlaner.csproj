@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="Pages\Account\" />
     <Folder Include="wwwroot\js\" />
+    <Folder Include="DataBase\" />
   </ItemGroup>
 
   <ItemGroup>

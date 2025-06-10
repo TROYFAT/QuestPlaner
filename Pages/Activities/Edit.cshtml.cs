@@ -1,19 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using QuestPlanner.Data;
 using QuestPlanner.Models;
-using System.Threading.Tasks;
+using QuestPlanner.Data;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuestPlanner.Pages.Activities
 {
+    [Authorize]
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<EditModel> _logger;
 
-        public EditModel(ApplicationDbContext context)
+        public EditModel(ApplicationDbContext context, ILogger<EditModel> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -30,7 +34,7 @@ namespace QuestPlanner.Pages.Activities
 
             Activity = await _context.Activities
                 .Include(a => a.Trip)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (Activity == null)
             {
@@ -38,58 +42,95 @@ namespace QuestPlanner.Pages.Activities
             }
 
             Trip = Activity.Trip;
+
+            // Проверка прав доступа
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (Trip.UserId != currentUserId)
+            {
+                return Forbid();
+            }
+
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Удаляем ошибки валидации для навигационных свойств
+            ModelState.Remove("Activity.Trip");
+
             if (!ModelState.IsValid)
             {
-                // Перезагружаем поездку при ошибках валидации
-                Trip = await _context.Trips.FindAsync(Activity.TripId);
                 return Page();
             }
 
-            // Проверяем существование поездки
+            // Загружаем связанную поездку для проверки прав
             var trip = await _context.Trips.FindAsync(Activity.TripId);
             if (trip == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Поездка не найдена");
+                return Page();
             }
 
             // Проверка дат активности
             if (Activity.EndTime <= Activity.StartTime)
             {
                 ModelState.AddModelError("Activity.EndTime", "Дата окончания должна быть позже даты начала");
-                Trip = trip;
                 return Page();
             }
 
-            // Проверка в рамках поездки
-            if (Activity.StartTime < trip.StartDate || Activity.EndTime > trip.EndDate)
+            // Проверка соответствия дат поездке
+            if (Activity.StartTime < trip.StartDate)
             {
-                ModelState.AddModelError("", "Активность должна полностью находиться в рамках поездки");
-                Trip = trip;
+                ModelState.AddModelError("Activity.StartTime",
+                    $"Дата начала активности не может быть раньше начала поездки ({trip.StartDate:dd.MM.yyyy})");
+            }
+
+            if (Activity.EndTime > trip.EndDate)
+            {
+                ModelState.AddModelError("Activity.EndTime",
+                    $"Дата окончания активности не может быть позже окончания поездки ({trip.EndDate:dd.MM.yyyy})");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                Trip = trip; // Обязательно устанавливаем Trip для отображения на странице
                 return Page();
             }
 
-            // Обновляем активность
-            var activityToUpdate = await _context.Activities.FindAsync(Activity.Id);
-            if (activityToUpdate == null)
+            // Проверка прав доступа
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (trip.UserId != currentUserId)
             {
-                return NotFound();
+                return Forbid();
             }
 
-            activityToUpdate.Name = Activity.Name;
-            activityToUpdate.Price = Activity.Price;
-            activityToUpdate.Location = Activity.Location;
-            activityToUpdate.StartTime = Activity.StartTime;
-            activityToUpdate.EndTime = Activity.EndTime;
-            activityToUpdate.Progress = Activity.Progress;
-            activityToUpdate.TripId = Activity.TripId;
+            try
+            {
+                // Устанавливаем правильный kind для дат
+                Activity.StartTime = DateTime.SpecifyKind(Activity.StartTime, DateTimeKind.Unspecified);
+                Activity.EndTime = DateTime.SpecifyKind(Activity.EndTime, DateTimeKind.Unspecified);
 
-            await _context.SaveChangesAsync();
-            return RedirectToPage("./Index", new { tripId = Activity.TripId });
+                _context.Attach(Activity).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return RedirectToPage("./Index", new { tripId = Activity.TripId });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ActivityExists(Activity.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        private bool ActivityExists(int id)
+        {
+            return _context.Activities.Any(e => e.Id == id);
         }
     }
 }

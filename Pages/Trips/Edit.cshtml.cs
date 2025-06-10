@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using QuestPlanner.Data;
 using QuestPlanner.Models;
+using QuestPlanner.Data;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuestPlanner.Pages.Trips
 {
+    [Authorize]
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -29,18 +30,20 @@ namespace QuestPlanner.Pages.Trips
                 return NotFound();
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             Trip = await _context.Trips
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (Trip == null)
             {
                 return NotFound();
             }
 
-            if (Trip.Status == TripStatus.Completed)
+            // Проверка прав доступа
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (Trip.UserId != currentUserId)
             {
-                return RedirectToPage("./Details", new { id });
+                return Forbid();
             }
 
             return Page();
@@ -48,25 +51,32 @@ namespace QuestPlanner.Pages.Trips
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Удаляем ошибки валидации для полей, которые не редактируются
+            ModelState.Remove("Trip.UserId");
+            ModelState.Remove("Trip.User");
+            ModelState.Remove("Trip.Activities");
+
+            var activities = await _context.Activities
+                .Where(a => a.TripId == Trip.Id)
+                .ToListAsync();
+
+            foreach (var activity in activities)
+            {
+                if (activity.StartTime < Trip.StartDate)
+                {
+                    ModelState.AddModelError("Trip.StartDate",
+                        $"Дата начала поездки не может быть позже активности '{activity.Name}' ({activity.StartTime:dd.MM.yyyy})");
+                }
+
+                if (activity.EndTime > Trip.EndDate)
+                {
+                    ModelState.AddModelError("Trip.EndDate",
+                        $"Дата окончания поездки не может быть раньше активности '{activity.Name}' ({activity.EndTime:dd.MM.yyyy})");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
-                return Page();
-            }
-
-            // Проверяем владельца поездки
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var existingTrip = await _context.Trips
-                .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.Id == Trip.Id && t.UserId == userId);
-
-            if (existingTrip == null)
-            {
-                return NotFound();
-            }
-
-            if (existingTrip.Status == TripStatus.Completed)
-            {
-                ModelState.AddModelError("", "Завершенные поездки нельзя редактировать");
                 return Page();
             }
 
@@ -77,41 +87,33 @@ namespace QuestPlanner.Pages.Trips
                 return Page();
             }
 
-            // Устанавливаем неизменяемые поля
-            Trip.UserId = existingTrip.UserId;
-            Trip.Status = existingTrip.Status;
+            // Проверка прав доступа
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (Trip.UserId != currentUserId)
+            {
+                return Forbid();
+            }
 
             try
             {
-                // Обновляем только изменяемые поля
-                var tripToUpdate = await _context.Trips.FindAsync(Trip.Id);
-                if (tripToUpdate == null)
-                {
-                    return NotFound();
-                }
+                // Устанавливаем правильный kind для дат
+                Trip.StartDate = DateTime.SpecifyKind(Trip.StartDate, DateTimeKind.Unspecified);
+                Trip.EndDate = DateTime.SpecifyKind(Trip.EndDate, DateTimeKind.Unspecified);
 
-                tripToUpdate.Title = Trip.Title;
-                tripToUpdate.Destination = Trip.Destination;
-                tripToUpdate.PeopleCount = Trip.PeopleCount;
-                tripToUpdate.BasePrice = Trip.BasePrice;
-                tripToUpdate.StartDate = Trip.StartDate;
-                tripToUpdate.EndDate = Trip.EndDate;
-                tripToUpdate.Progress = Trip.Progress;
-
+                _context.Attach(Trip).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+
                 return RedirectToPage("./Index");
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException)
             {
-                _logger.LogError(ex, "Ошибка при обновлении поездки");
                 if (!TripExists(Trip.Id))
                 {
                     return NotFound();
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Ошибка при сохранении изменений. Пожалуйста, попробуйте снова.");
-                    return Page();
+                    throw;
                 }
             }
         }

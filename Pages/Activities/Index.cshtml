@@ -25,30 +25,66 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Trip.Activities)
+                    @if (Model.Activities != null)
+                    {
+                        @foreach (var item in Model.Trip.Activities)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.StartTime.ToString("g")</td>
+                                <td>@item.EndTime.ToString("g")</td>
+                                <td>@item.Price.ToString("C")</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar"
+                                             style="width: @item.Progress%;"
+                                             aria-valuenow="@item.Progress"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                            @item.Progress%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Изменить</a>
+                                        <!-- Кнопка удаления с триггером модального окна -->
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal-@item.Id">
+                                            Удалить
+                                        </button>
+                                    </div>
+
+                                    <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Удаление активности</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Вы уверены, что хотите удалить активность <strong>@item.Name</strong>?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                    <form method="post" asp-page-handler="Delete">
+                                                        <input type="hidden" name="id" value="@item.Id" />
+                                                        <button type="submit" class="btn btn-danger">Удалить</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }    
+                    }
+                    else
                     {
                         <tr>
-                            <td>@item.Name</td>
-                            <td>@item.StartTime.ToString("g")</td>
-                            <td>@item.EndTime.ToString("g")</td>
-                            <td>@item.Price.ToString("C")</td>
-                            <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar" role="progressbar"
-                                         style="width: @item.Progress%;"
-                                         aria-valuenow="@item.Progress"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100">
-                                        @item.Progress%
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Изменить</a>
-                                    <a asp-page="./Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Удалить</a>
-                                </div>
-                            </td>
+                            <td colspan="6">Нет активностей</td>
                         </tr>
                     }
                 </tbody>

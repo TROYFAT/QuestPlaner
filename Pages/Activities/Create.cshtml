@@ -1,90 +1,150 @@
 ﻿@page
 @model QuestPlanner.Pages.Activities.CreateModel
 @{
-    ViewData["Title"] = "Добавить активность";
+    ViewData["Title"] = "Создать активность";
 }
 
 <div class="content-container bg-white rounded shadow-sm p-4">
-    <h4>Добавить активность для поездки: @Model.Trip.Title</h4>
-    <hr />
+    <h1 class="text-center mb-4">Создать активность</h1>
+    <h4 class="text-center mb-4">для поездки: @Model.Trip.Title</h4>
 
-    <div class="row">
-        <div class="col-md-6">
-            <form method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="TripId" />
+    <form method="post">
+        <input type="hidden" asp-for="Activity.TripId" />
 
-                <div class="form-group mb-3">
-                    <label asp-for="Activity.Name" class="control-label"></label>
-                    <input asp-for="Activity.Name" class="form-control" />
-                    <span asp-validation-for="Activity.Name" class="text-danger"></span>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Activity.Name" class="form-label">Название *</label>
+            <input asp-for="Activity.Name" class="form-control" />
+            <span asp-validation-for="Activity.Name" class="text-danger"></span>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Activity.StartTime" class="form-label">Дата начала *</label>
+                    <input asp-for="Activity.StartTime" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="Activity.StartTime" class="text-danger"></span>
                 </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Activity.EndTime" class="form-label">Дата окончания *</label>
+                    <input asp-for="Activity.EndTime" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="Activity.EndTime" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="Activity.Price" class="control-label"></label>
-                    <input asp-for="Activity.Price" class="form-control" />
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Activity.Price" class="form-label">Цена *</label>
+                    <input asp-for="Activity.Price" class="form-control" min="0" step="0.01" />
                     <span asp-validation-for="Activity.Price" class="text-danger"></span>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label asp-for="Activity.StartTime" class="control-label"></label>
-                            <input asp-for="Activity.StartTime" class="form-control" type="datetime-local"
-                                   min="@Model.Trip.StartDate.ToString("yyyy-MM-dd")T00:00"
-                                   max="@Model.Trip.EndDate.ToString("yyyy-MM-dd")T23:59" />
-                            <span asp-validation-for="Activity.StartTime" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label asp-for="Activity.EndTime" class="control-label"></label>
-                            <input asp-for="Activity.EndTime" class="form-control" type="datetime-local"
-                                   min="@Model.Trip.StartDate.ToString("yyyy-MM-dd")T00:00"
-                                   max="@Model.Trip.EndDate.ToString("yyyy-MM-dd")T23:59" />
-                            <span asp-validation-for="Activity.EndTime" class="text-danger"></span>
-                        </div>
-                    </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Activity.Location" class="form-label">Местоположение</label>
+                    <input asp-for="Activity.Location" class="form-control" />
+                    <span asp-validation-for="Activity.Location" class="text-danger"></span>
                 </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="Activity.Progress" class="control-label"></label>
-                    <div class="d-flex align-items-center">
-                        <input asp-for="Activity.Progress" class="form-range" type="range" min="0" max="100" step="5"
-                               oninput="document.getElementById('progress-value').textContent = this.value + '%'" />
-                        <span class="ms-3" id="progress-value">@Model.Activity.Progress%</span>
-                    </div>
-                    <span asp-validation-for="Activity.Progress" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary">Создать активность</button>
-                    <a asp-page="./Index" asp-route-tripId="@Model.TripId" class="btn btn-outline-secondary ms-2">Отмена</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <div class="form-group mb-4">
+            <label asp-for="Activity.Progress" class="form-label">Прогресс</label>
+            <div class="d-flex align-items-center">
+                <input asp-for="Activity.Progress" class="form-range" type="range" min="0" max="100" step="5"
+                       id="progress-slider" />
+                <span class="ms-3" id="progress-value">@Model.Activity.Progress%</span>
+            </div>
+            <span asp-validation-for="Activity.Progress" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mt-4 text-center">
+            <button type="submit" class="btn btn-primary">Создать</button>
+            <a asp-page="Index" asp-route-tripId="@Model.TripId" class="btn btn-secondary ms-2">Назад к активностям</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const startInput = document.querySelector('input[name="Activity.StartTime"]');
-            const endInput = document.querySelector('input[name="Activity.EndTime"]');
+            // Инициализация ползунка прогресса
+            const progressSlider = document.getElementById('progress-slider');
+            const progressValue = document.getElementById('progress-value');
 
-            startInput.addEventListener('change', function() {
-                endInput.min = this.value;
-                if (new Date(endInput.value) < new Date(this.value)) {
-                    endInput.value = this.value;
-                }
-            });
+            if (progressSlider && progressValue) {
+                progressSlider.addEventListener('input', function() {
+                    progressValue.textContent = this.value + '%';
+                });
+                progressValue.textContent = progressSlider.value + '%';
+            }
 
-            endInput.addEventListener('change', function() {
-                if (new Date(this.value) < new Date(startInput.value)) {
-                    this.value = startInput.value;
+            // Получаем даты поездки (учитываем, что сервер присылает их в UTC)
+            const tripStart = new Date('@Model.Trip.StartDate.ToString("yyyy-MM-ddTHH:mm")');
+            const tripEnd = new Date('@Model.Trip.EndDate.ToString("yyyy-MM-ddTHH:mm")');
+
+            // Форматирование даты для input[type=datetime-local]
+            function formatDateTime(date) {
+                const pad = num => num.toString().padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            }
+
+            // Установка начальных значений дат
+            const startTimeInput = document.querySelector('input[name="Activity.StartTime"]');
+            const endTimeInput = document.querySelector('input[name="Activity.EndTime"]');
+
+            if (startTimeInput) {
+                const startTime = new Date('@Model.Activity.StartTime.ToString("yyyy-MM-ddTHH:mm")');
+                startTimeInput.value = formatDateTime(startTime);
+            }
+
+            if (endTimeInput) {
+                const endTime = new Date('@Model.Activity.EndTime.ToString("yyyy-MM-ddTHH:mm")');
+                endTimeInput.value = formatDateTime(endTime);
+            }
+
+            // Валидация дат
+            if (startTimeInput && endTimeInput) {
+                startTimeInput.addEventListener('change', validateDates);
+                endTimeInput.addEventListener('change', validateDates);
+
+                function validateDates() {
+                    const start = new Date(startTimeInput.value);
+                    const end = new Date(endTimeInput.value);
+
+                    // Сброс предыдущих ошибок
+                    startTimeInput.setCustomValidity('');
+                    endTimeInput.setCustomValidity('');
+
+                    // Проверка 1: Дата окончания > даты начала
+                    if (end <= start) {
+                        endTimeInput.setCustomValidity('Дата окончания должна быть позже даты начала');
+                    }
+
+                    // Проверка 2: В рамках поездки
+                    if (start < tripStart) {
+                        startTimeInput.setCustomValidity(
+                            `Дата не может быть раньше ${tripStart.toLocaleDateString()}`
+                        );
+                    }
+
+                    if (end > tripEnd) {
+                        endTimeInput.setCustomValidity(
+                            `Дата не может быть позже ${tripEnd.toLocaleDateString()}`
+                        );
+                    }
+
+                    // Принудительное обновление сообщений валидации
+                    startTimeInput.reportValidity();
+                    endTimeInput.reportValidity();
                 }
-            });
+            }
         });
     </script>
 }

@@ -5,6 +5,7 @@ using QuestPlanner.Data;
 using QuestPlanner.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace QuestPlanner.Pages.Trips
 {
@@ -18,6 +19,16 @@ namespace QuestPlanner.Pages.Trips
         }
 
         public Trip Trip { get; set; }
+
+        public int TotalTimelineWidth
+        {
+            get
+            {
+                if (Trip == null) return 0;
+                var days = (Trip.EndDate - Trip.StartDate).TotalDays + 1;
+                return (int)days * 30; // 30px на день
+            }
+        }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {

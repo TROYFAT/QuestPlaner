@@ -4,10 +4,9 @@
     ViewData["Title"] = "Создать поездку";
 }
 
-<div class="content-container">
+<div class="content-container create-form">
     <h1 class="text-center mb-4">Создать поездку</h1>
 
-    <div class="create-form">
         <form method="post">
             <!-- Отображение общих ошибок -->
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -68,12 +67,11 @@
                 <span asp-validation-for="Trip.Progress" class="text-danger"></span>
             </div>
 
-            <div class="form-group mt-4">
+            <div class="form-group mt-4 text-center">
                 <button type="submit" class="btn btn-primary">@(Model.Trip?.Id == 0 ? "Создать" : "Сохранить")</button>
                 <a asp-page="./Index" class="btn btn-secondary ms-2">Отмена</a>
             </div>
         </form>
-    </div>
 </div>
 
 @section Scripts {
