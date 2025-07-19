@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Pages\Account\" />
     <Folder Include="wwwroot\js\" />
-    <Folder Include="DataBase\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +26,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
   </ItemGroup>
 
 </Project>
