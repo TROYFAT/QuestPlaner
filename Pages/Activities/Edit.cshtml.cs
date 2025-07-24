@@ -43,11 +43,15 @@ namespace QuestPlanner.Pages.Activities
 
             Trip = Activity.Trip;
 
-            // Проверка прав доступа
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (Trip.UserId != currentUserId)
             {
                 return Forbid();
+            }
+            if (Activity.TripId != Trip.Id)
+            {
+                ModelState.AddModelError(string.Empty, "Несоответствие идентификатора поездки");
+                return Page();
             }
 
             return Page();
@@ -55,58 +59,50 @@ namespace QuestPlanner.Pages.Activities
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Удаляем ошибки валидации для навигационных свойств
+            Trip = await _context.Trips.FindAsync(Activity.TripId);
+            if (Trip == null)
+            {
+                return NotFound();
+            }
+
             ModelState.Remove("Activity.Trip");
 
             if (!ModelState.IsValid)
             {
-                return Page();
+                return Page(); 
             }
 
-            // Загружаем связанную поездку для проверки прав
-            var trip = await _context.Trips.FindAsync(Activity.TripId);
-            if (trip == null)
-            {
-                ModelState.AddModelError(string.Empty, "Поездка не найдена");
-                return Page();
-            }
-
-            // Проверка дат активности
-            if (Activity.EndTime <= Activity.StartTime)
-            {
-                ModelState.AddModelError("Activity.EndTime", "Дата окончания должна быть позже даты начала");
-                return Page();
-            }
-
-            // Проверка соответствия дат поездке
-            if (Activity.StartTime < trip.StartDate)
-            {
-                ModelState.AddModelError("Activity.StartTime",
-                    $"Дата начала активности не может быть раньше начала поездки ({trip.StartDate:dd.MM.yyyy})");
-            }
-
-            if (Activity.EndTime > trip.EndDate)
-            {
-                ModelState.AddModelError("Activity.EndTime",
-                    $"Дата окончания активности не может быть позже окончания поездки ({trip.EndDate:dd.MM.yyyy})");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                Trip = trip; // Обязательно устанавливаем Trip для отображения на странице
-                return Page();
-            }
-
-            // Проверка прав доступа
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (trip.UserId != currentUserId)
+            if (Trip.UserId != currentUserId)
             {
                 return Forbid();
             }
 
+            if (Activity.EndTime <= Activity.StartTime)
+            {
+                ModelState.AddModelError("Activity.EndTime", "Дата окончания должна быть позже даты начала");
+                return Page(); 
+            }
+
+            if (Activity.StartTime < Trip.StartDate)
+            {
+                ModelState.AddModelError("Activity.StartTime",
+                    $"Дата начала активности не может быть раньше начала поездки ({Trip.StartDate:dd.MM.yyyy})");
+            }
+
+            if (Activity.EndTime > Trip.EndDate)
+            {
+                ModelState.AddModelError("Activity.EndTime",
+                    $"Дата окончания активности не может быть позже окончания поездки ({Trip.EndDate:dd.MM.yyyy})");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return Page(); 
+            }
+
             try
             {
-                // Устанавливаем правильный kind для дат
                 Activity.StartTime = DateTime.SpecifyKind(Activity.StartTime, DateTimeKind.Unspecified);
                 Activity.EndTime = DateTime.SpecifyKind(Activity.EndTime, DateTimeKind.Unspecified);
 

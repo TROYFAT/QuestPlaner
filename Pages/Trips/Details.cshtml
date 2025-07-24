@@ -15,21 +15,26 @@
                     <strong>Название</strong>
                 </div>
                 <div class="gantt-timeline d-flex" style="width: @(Model.TotalTimelineWidth)px;">
-                    @for (var day = Model.Trip.StartDate; day <= Model.Trip.EndDate; day = day.AddDays(1))
+                    @{
+                        var currentDay = Model.Trip.StartDate.Date;
+                        var lastDay = Model.Trip.EndDate.Date;
+                    }
+                    @while (currentDay <= lastDay)
                     {
-                        <div class="gantt-day @(day.Day == 1 ? "first-day" : "")"
+                        <div class="gantt-day @(currentDay.Day == 1 ? "first-day" : "")"
                              style="width: 30px; border-left: 1px solid #dee2e6;">
                             <small>
-                                @if (day.Day == 1 || day == Model.Trip.StartDate)
+                                @if (currentDay.Day == 1 || currentDay == Model.Trip.StartDate.Date)
                                 {
-                                    @day.ToString("MMM d")
+                                    @currentDay.ToString("MMM d")
                                 }
                                 else
                                 {
-                                    @day.Day
+                                    @currentDay.Day
                                 }
                             </small>
                         </div>
+                        currentDay = currentDay.AddDays(1);
                     }
                 </div>
             </div>

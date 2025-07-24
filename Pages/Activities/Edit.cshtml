@@ -78,7 +78,6 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Инициализация ползунка прогресса
             const progressSlider = document.getElementById('progress-slider');
             const progressValue = document.getElementById('progress-value');
 
@@ -89,17 +88,14 @@
                 progressValue.textContent = progressSlider.value + '%';
             }
 
-            // Получаем даты поездки
-            const tripStart = new Date('@Model.Trip.StartDate.ToString("O")');
-            const tripEnd = new Date('@Model.Trip.EndDate.ToString("O")');
+            const tripStart = new Date('@Model.Trip.StartDate.ToString("yyyy-MM-ddTHH:mm:ss")');
+            const tripEnd = new Date('@Model.Trip.EndDate.ToString("yyyy-MM-ddTHH:mm:ss")');
 
-            // Форматирование даты для input[type=datetime-local]
             function formatDateTime(date) {
                 const pad = num => num.toString().padStart(2, '0');
                 return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
             }
 
-            // Установка значений дат
             const startTimeInput = document.querySelector('input[name="Activity.StartTime"]');
             const endTimeInput = document.querySelector('input[name="Activity.EndTime"]');
 
@@ -110,7 +106,6 @@
                 endTimeInput.value = formatDateTime(new Date('@Model.Activity.EndTime.ToString("O")'));
             }
 
-            // Валидация дат
             if (startTimeInput && endTimeInput) {
                 startTimeInput.addEventListener('change', validateDates);
                 endTimeInput.addEventListener('change', validateDates);
@@ -119,16 +114,13 @@
                     const start = new Date(startTimeInput.value);
                     const end = new Date(endTimeInput.value);
 
-                    // Сброс предыдущих ошибок
                     startTimeInput.setCustomValidity('');
                     endTimeInput.setCustomValidity('');
 
-                    // Проверка 1: Дата окончания > даты начала
                     if (end <= start) {
                         endTimeInput.setCustomValidity('Дата окончания должна быть позже даты начала');
                     }
 
-                    // Проверка 2: В рамках поездки
                     if (start < tripStart) {
                         startTimeInput.setCustomValidity(
                             `Дата не может быть раньше ${tripStart.toLocaleDateString()}`
@@ -141,7 +133,6 @@
                         );
                     }
 
-                    // Принудительное обновление сообщений валидации
                     startTimeInput.reportValidity();
                     endTimeInput.reportValidity();
                 }
