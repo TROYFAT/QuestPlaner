@@ -58,9 +58,7 @@ main {
     flex-direction: column;
     padding: 20px 0;
     width: 100%;
-    /* Центрирование содержимого */
     align-items: center;
-    /* Равные отступы сверху и снизу */
     justify-content: center;
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
 }
@@ -251,10 +249,23 @@ footer {
 }
 
 .btn-lg {
-    min-width: 220px;
+    font-size: 1.25rem;
+    padding: 0.75rem 1.5rem;
+    min-width: 260px;
     text-align: center;
 }
 
+.trips-table th:not(:last-child),
+.trips-table td:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+.trips-table th:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
+.trips-table th:last-child,
+.trips-table td:last-child {
+    border-right: none;
+}
 .text-center.py-5 {
     padding-top: 3rem !important;
     padding-bottom: 3rem !important;
@@ -273,6 +284,15 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .btn-lg {
+        font-size: 1.1rem;
+        padding: 0.65rem 1.25rem;
+        min-width: 220px;
+    }
+    .trips-table th:not(:last-child),
+    .trips-table td:not(:last-child) {
+        border-right: none;
+    }
     .content-container {
         padding: 20px;
     }
@@ -317,4 +337,121 @@ footer {
     .display-4 {
         font-size: 2.5rem;
     }
+    .table-centered-cell {
+        padding: 0.85rem 0.5rem !important;
+        font-size: 0.9rem;
+    }
+
+    .trip-badge {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+    .trip-progress-bar {
+        font-size: 0.7rem; 
+    }
+    .activity-title {
+        font-size: 1.5rem;
+    }
+    .activities-table th:not(:last-child),
+    .activities-table td:not(:last-child) {
+        border-right: none;
+    }
+
+    .activities-table .progress-col,
+    .activities-table .actions-col {
+        min-width: auto;
+    }
+}
+@media (max-width: 992px) {
+    .trips-table .progress-col,
+    .trips-table .status-col,
+    .trips-table .actions-col {
+        min-width: auto;
+    }
+
+    .btn-group-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+.btn-outline-purple {
+    color: #6f42c1;
+    border-color: #6f42c1;
+}
+    .btn-outline-purple:hover {
+        color: white;
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+    }
+.table-centered-cell {
+    text-align: center;
+    vertical-align: middle;
+    padding: 1rem 0.5rem;
+}
+
+.trips-table th {
+    min-width: 120px;
+    padding: 1rem 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.trips-table .progress-col {
+    min-width: 180px;
+}
+
+.trips-table .status-col {
+    min-width: 140px;
+}
+
+.trips-table .actions-col {
+    min-width: 240px;
+}
+
+.trip-progress-bar {
+    min-width: 40px;
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    font-size: 0.8rem; 
+}
+
+.trip-badge {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.btn-group-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+.activity-title {
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.activities-table th:not(:last-child),
+.activities-table td:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.activities-table th:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.activities-table th:last-child,
+.activities-table td:last-child {
+    border-right: none;
+}
+
+.activities-table .progress-col {
+    min-width: 180px;
+}
+
+.activities-table .actions-col {
+    min-width: 200px;
 }

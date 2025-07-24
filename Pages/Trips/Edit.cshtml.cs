@@ -38,8 +38,6 @@ namespace QuestPlanner.Pages.Trips
             {
                 return NotFound();
             }
-
-            // Проверка прав доступа
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (Trip.UserId != currentUserId)
             {
@@ -51,7 +49,6 @@ namespace QuestPlanner.Pages.Trips
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Удаляем ошибки валидации для полей, которые не редактируются
             ModelState.Remove("Trip.UserId");
             ModelState.Remove("Trip.User");
             ModelState.Remove("Trip.Activities");
@@ -80,14 +77,12 @@ namespace QuestPlanner.Pages.Trips
                 return Page();
             }
 
-            // Проверка дат
             if (Trip.EndDate <= Trip.StartDate)
             {
                 ModelState.AddModelError("Trip.EndDate", "Дата окончания должна быть позже даты начала");
                 return Page();
             }
 
-            // Проверка прав доступа
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (Trip.UserId != currentUserId)
             {
@@ -96,7 +91,6 @@ namespace QuestPlanner.Pages.Trips
 
             try
             {
-                // Устанавливаем правильный kind для дат
                 Trip.StartDate = DateTime.SpecifyKind(Trip.StartDate, DateTimeKind.Unspecified);
                 Trip.EndDate = DateTime.SpecifyKind(Trip.EndDate, DateTimeKind.Unspecified);
 

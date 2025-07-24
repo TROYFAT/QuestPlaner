@@ -5,23 +5,27 @@
 }
 
 <div class="content-container bg-white rounded shadow-sm p-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4>Активности для поездки: @Model.Trip.Title</h4>
-        <a asp-page="Create" asp-route-tripId="@Model.Trip.Id" class="btn btn-primary">Создать активность</a>
+
+    <div class="text-center mb-4">
+        <h3 class="activity-title">Активности для поездки: @Model.Trip.Title</h3>
+    </div>
+
+    <div class="text-center mb-5">
+        <a asp-page="Create" asp-route-tripId="@Model.Trip.Id" class="btn btn-primary btn-lg">Создать активность</a>
     </div>
 
     @if (Model.Trip.Activities.Any())
     {
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover activities-table">
                 <thead class="table-light">
                     <tr>
-                        <th>Название</th>
-                        <th>Дата начала</th>
-                        <th>Дата окончания</th>
-                        <th>Цена</th>
-                        <th>Прогресс</th>
-                        <th>Действия</th>
+                        <th class="table-centered-cell">Название</th>
+                        <th class="table-centered-cell">Дата начала</th>
+                        <th class="table-centered-cell">Дата окончания</th>
+                        <th class="table-centered-cell">Цена</th>
+                        <th class="table-centered-cell progress-col">Прогресс</th>
+                        <th class="table-centered-cell actions-col">Действия</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,25 +34,26 @@
                         @foreach (var item in Model.Trip.Activities)
                         {
                             <tr>
-                                <td>@item.Name</td>
-                                <td>@item.StartTime.ToString("g")</td>
-                                <td>@item.EndTime.ToString("g")</td>
-                                <td>@item.Price.ToString("C")</td>
-                                <td>
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar" role="progressbar"
-                                             style="width: @item.Progress%;"
-                                             aria-valuenow="@item.Progress"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100">
-                                            @item.Progress%
+                                <td class="table-centered-cell">@item.Name</td>
+                                <td class="table-centered-cell">@item.StartTime.ToString("g")</td>
+                                <td class="table-centered-cell">@item.EndTime.ToString("g")</td>
+                                <td class="table-centered-cell">@item.Price.ToString("C")</td>
+                                <td class="table-centered-cell">
+                                    <div class="d-flex flex-column">
+                                        <div class="progress">
+                                            <div class="progress-bar trip-progress-bar" role="progressbar"
+                                                 style="width: @item.Progress%;"
+                                                 aria-valuenow="@item.Progress"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                                @item.Progress%
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <div class="d-flex gap-2">
+                                <td class="table-centered-cell">
+                                    <div class="btn-group-actions">
                                         <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Изменить</a>
-                                        <!-- Кнопка удаления с триггером модального окна -->
                                         <button type="button" class="btn btn-sm btn-danger"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#deleteModal-@item.Id">
@@ -57,7 +62,7 @@
                                     </div>
 
                                     <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title">Удаление активности</h5>
@@ -76,10 +81,9 @@
                                             </div>
                                         </div>
                                     </div>
-
                                 </td>
                             </tr>
-                        }    
+                        }
                     }
                     else
                     {

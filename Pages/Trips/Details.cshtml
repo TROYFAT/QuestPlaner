@@ -8,10 +8,8 @@
     <h4 class="text-center">@Model.Trip.Title</h4>
     <hr />
 
-    <!-- Диаграмма Ганта -->
     <div class="gantt-container mt-4" style="overflow-x: auto;">
         <div class="gantt-inner" style="min-width: @(200 + Model.TotalTimelineWidth)px;">
-            <!-- Заголовок -->
             <div class="gantt-header d-flex mb-3">
                 <div class="gantt-sidebar" style="width: 200px; flex-shrink: 0;">
                     <strong>Название</strong>
@@ -36,7 +34,6 @@
                 </div>
             </div>
 
-            <!-- Бар поездки -->
             <div class="gantt-row mb-2 d-flex">
                 <div class="gantt-sidebar" style="width: 200px; flex-shrink: 0;">
                     @Model.Trip.Title
@@ -54,7 +51,6 @@
                 </div>
             </div>
 
-            <!-- Бары активностей -->
             @foreach (var activity in Model.Trip.Activities.OrderBy(a => a.StartTime))
             {
                 <div class="gantt-row mb-2 d-flex">
@@ -77,20 +73,17 @@
         </div>
     </div>
 
-    <!-- Общая стоимость -->
     <div class="text-center mt-4">
         <h5>Общая стоимость: @Model.GetTotalCost().ToString("C")</h5>
     </div>
 
-    <!-- Кнопка Назад -->
     <div class="text-center mt-4">
         <a asp-page="./Index" class="btn btn-secondary">Назад к поездкам</a>
     </div>
 </div>
 
-<!-- Модальное окно поездки -->
 <div class="modal fade" id="tripModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">@Model.Trip.Title</h5>
@@ -107,17 +100,20 @@
     </div>
 </div>
 
-<!-- Модальные окна активностей -->
 @foreach (var activity in Model.Trip.Activities)
 {
     <div class="modal fade" id="activityModal-@activity.Id" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">@activity.Name</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(activity.Location))
+                    {
+                        <p><strong>Местоположение:</strong> @activity.Location</p>
+                    }
                     <p><strong>Даты:</strong> @activity.StartTime.ToString("g") - @activity.EndTime.ToString("g")</p>
                     <p><strong>Цена:</strong> @activity.Price.ToString("C")</p>
                     <p><strong>Прогресс:</strong> @activity.Progress%</p>
@@ -159,7 +155,7 @@
             overflow: hidden;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 10; /* Для кликабельности */
+            z-index: 10; 
         }
 
         .trip-bar {

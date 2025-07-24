@@ -240,6 +240,9 @@ ALTER TABLE public."__EFMigrationsHistory" OWNER TO postgres;
 --
 
 COPY public."Activities" ("Id", "Name", "Price", "Location", "StartTime", "EndTime", "TripId", "Progress") FROM stdin;
+1	Экспедиция	2500.00	Ларек Трусовский	2025-07-27 20:03:00	2025-07-27 21:03:00	1	10
+3	Просмотр достопримечательности	75000.00	Колизей Рима	2025-07-21 12:58:00	2025-07-22 13:58:00	5	100
+5	Покупка Сувенира	1250.00	\N	2025-07-26 14:01:00	2025-07-26 14:15:00	5	100
 \.
 
 
@@ -305,7 +308,11 @@ COPY public."AspNetUsers" ("Id", "RegistrationDate", "UserName", "NormalizedUser
 --
 
 COPY public."Trips" ("Id", "Title", "Destination", "PeopleCount", "BasePrice", "StartDate", "EndDate", "Progress", "UserId", "Status") FROM stdin;
-1	Поездка в родной город	Ростов-на-Дону	3	2500.00	2025-07-26 00:00:00	2025-07-30 00:00:00	20	71a1d132-28e2-4eb0-b1a3-ce7242412612	0
+5	Поездка в Италию	Рим	15	240000.00	2025-07-19 00:00:00	2025-07-30 00:00:00	100	71a1d132-28e2-4eb0-b1a3-ce7242412612	1
+4	Отдых дома	Новочеркасск	1	1200.00	2025-08-01 00:00:00	2025-08-03 00:00:00	5	71a1d132-28e2-4eb0-b1a3-ce7242412612	0
+3	Поездка по Германии	Берлин	1	40000.00	2025-07-09 00:00:00	2025-07-18 00:00:00	100	71a1d132-28e2-4eb0-b1a3-ce7242412612	2
+2	Поездка по России	Белгород	4	25000.00	2025-07-21 00:00:00	2025-08-26 00:00:00	65	71a1d132-28e2-4eb0-b1a3-ce7242412612	1
+1	Поездка в родной город	Ростов-на-Дону	3	2500.00	2025-07-26 00:00:00	2025-07-30 00:00:00	35	71a1d132-28e2-4eb0-b1a3-ce7242412612	0
 \.
 
 
@@ -323,7 +330,7 @@ COPY public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") FROM stdin
 -- Name: Activities_Id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Activities_Id_seq"', 1, false);
+SELECT pg_catalog.setval('public."Activities_Id_seq"', 5, true);
 
 
 --
@@ -344,7 +351,7 @@ SELECT pg_catalog.setval('public."AspNetUserClaims_Id_seq"', 1, false);
 -- Name: Trips_Id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Trips_Id_seq"', 1, true);
+SELECT pg_catalog.setval('public."Trips_Id_seq"', 5, true);
 
 
 --

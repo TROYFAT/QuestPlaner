@@ -26,7 +26,6 @@ namespace QuestPlanner.Pages.Trips
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!string.IsNullOrEmpty(userId))
             {
-                // Обновляем статусы перед загрузкой
                 var tripsToUpdate = await _context.Trips
                     .Where(t => t.UserId == userId && t.Status != TripStatus.Completed)
                     .ToListAsync();

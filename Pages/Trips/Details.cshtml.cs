@@ -26,7 +26,7 @@ namespace QuestPlanner.Pages.Trips
             {
                 if (Trip == null) return 0;
                 var days = (Trip.EndDate - Trip.StartDate).TotalDays + 1;
-                return (int)days * 30; // 30px на день
+                return (int)days * 30; 
             }
         }
 
@@ -52,13 +52,13 @@ namespace QuestPlanner.Pages.Trips
         public int GetDayOffset(DateTime date)
         {
             var days = (date - Trip.StartDate).TotalDays;
-            return (int)(days * 30); // 30px на день
+            return (int)(days * 30);
         }
 
         public int GetDurationWidth(DateTime start, DateTime end)
         {
             var days = (end - start).TotalDays + 1;
-            return (int)(days * 30); // 30px на день
+            return (int)(days * 30); 
         }
 
         public decimal GetTotalCost()

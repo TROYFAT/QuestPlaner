@@ -26,9 +26,10 @@ namespace QuestPlanner.Pages
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 Trips = await _context.Trips
-                    .Where(t => t.UserId == userId)
+                    .Where(t => t.UserId == userId
+                        && t.Status != TripStatus.Completed)
                     .OrderBy(t => t.StartDate)
-                    .Take(5) // Показываем только 5 ближайших поездок
+                    .Take(5)
                     .ToListAsync();
             }
         }
